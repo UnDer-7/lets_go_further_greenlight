@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"time"
@@ -18,7 +18,7 @@ type config struct {
 
 type application struct {
 	config config
-	logger *log.Logger
+	logger *slog.Logger
 }
 
 func main() {
@@ -28,7 +28,7 @@ func main() {
 	flag.StringVar(&config.env, "env", "development", "Environment (development|staging|production)")
 	flag.Parse()
 
-	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
+	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
 	app := &application{
 		config: config,
@@ -42,11 +42,14 @@ func main() {
 		Addr:         fmt.Sprintf(":%d", config.port),
 		Handler:      app.routes(),
 		IdleTimeout:  time.Minute,
-		ReadTimeout:  10 * time.Second,
-		WriteTimeout: 30 * time.Second,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
+		ErrorLog:     slog.NewLogLogger(logger.Handler(), slog.LevelError),
 	}
 
-	logger.Printf("Starting %s server on %s", config.env, srv.Addr)
+	logger.Info("starting server", "addr", srv.Addr, "env", config.env)
 	err := srv.ListenAndServe()
-	logger.Fatal(err)
+
+	logger.Error(err.Error())
+	os.Exit(1)
 }
