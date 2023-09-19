@@ -1,0 +1,14 @@
+version: '3.1'
+
+services:
+  postgres:
+    image: postgres
+    container_name: postgres_greenlight
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./docker_volume/postgress:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: greenlight
+      POSTGRES_USER: adminUsr
+      POSTGRES_PASSWORD: adminadmin
