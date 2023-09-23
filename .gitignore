@@ -26,3 +26,6 @@ gen
 tls/
 
 docker_volume/
+
+.env
+!sample.env
