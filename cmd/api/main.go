@@ -7,7 +7,9 @@ import (
 	"fmt"
 	_ "github.com/lib/pq"
 	"greenlight.mateus.cardoso.com/internal/data"
+	"log"
 	"log/slog"
+	"net"
 	"net/http"
 	"os"
 	"time"
@@ -70,11 +72,27 @@ func main() {
 		ErrorLog:     slog.NewLogLogger(logger.Handler(), slog.LevelError),
 	}
 
-	logger.Info("starting server", "addr", srv.Addr, "env", config.env)
+	logger.Info(
+		"starting server",
+		"addr", srv.Addr,
+		"env", config.env,
+		"LocalIP", getLocalIP())
 
 	err = srv.ListenAndServe()
 	logger.Error(err.Error())
 	os.Exit(1)
+}
+
+func getLocalIP() net.IP {
+	conn, err := net.Dial("udp", "8.8.8.8:80")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer conn.Close()
+
+	localAddress := conn.LocalAddr().(*net.UDPAddr)
+
+	return localAddress.IP
 }
 
 func openDB(config config) (*sql.DB, error) {
