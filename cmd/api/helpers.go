@@ -133,3 +133,11 @@ func (app *application) readInt(qs url.Values, key string, defaultValue int, v *
 
 	return i
 }
+
+func (app *application) printAllHeaders(r *http.Request) {
+	for name, values := range r.Header {
+		for _, value := range values {
+			fmt.Println(name, value)
+		}
+	}
+}
