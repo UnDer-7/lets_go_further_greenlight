@@ -6,6 +6,7 @@ import (
 	"flag"
 	_ "github.com/lib/pq"
 	"greenlight.mateus.cardoso.com/internal/data"
+	"greenlight.mateus.cardoso.com/internal/mailer"
 	"log"
 	"log/slog"
 	"net"
@@ -29,12 +30,20 @@ type config struct {
 		burst  int
 		enable bool
 	}
+	smtp struct {
+		host     string
+		port     int
+		username string
+		password string
+		sender   string
+	}
 }
 
 type application struct {
 	config config
 	logger *slog.Logger
 	models data.Models
+	mailer mailer.Mailer
 }
 
 func main() {
@@ -49,6 +58,11 @@ func main() {
 	flag.Float64Var(&config.limiter.rps, "limiter-rps", 2, "Rate limiter maximum requests per second")
 	flag.IntVar(&config.limiter.burst, "limiter-burst", 4, "Rate limiter maximum burst")
 	flag.BoolVar(&config.limiter.enable, "limiter-enabled", true, "Enable rate limiter")
+	flag.StringVar(&config.smtp.host, "smtp-host", "sandbox.smtp.mailtrap.io", "SMTP Host")
+	flag.IntVar(&config.smtp.port, "smtp-port", 2525, "SMTP port")
+	flag.StringVar(&config.smtp.username, "smtp-username", "45df17c270f1b3", "SMTP username")
+	flag.StringVar(&config.smtp.password, "smtp-password", "2f0711ef4e9f21", "SMTP password")
+	flag.StringVar(&config.smtp.sender, "smtp-sender", "Greenlight <no-reply@greenlight.mateuscardoso.net>", "SMTP sender")
 
 	flag.Parse()
 
@@ -68,6 +82,7 @@ func main() {
 		config: config,
 		logger: logger,
 		models: data.NewModels(db),
+		mailer: mailer.New(config.smtp.host, config.smtp.port, config.smtp.username, config.smtp.password, config.smtp.sender),
 	}
 
 	err = app.serve()
