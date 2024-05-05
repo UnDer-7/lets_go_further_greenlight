@@ -4,6 +4,8 @@ services:
   postgres:
     image: postgres
     container_name: postgres_greenlight
+    # restart policy to make sure the container is restarted automatically when your machine is rebooted
+    restart: unless-stopped
     ports:
       - "5432:5432"
     volumes:
