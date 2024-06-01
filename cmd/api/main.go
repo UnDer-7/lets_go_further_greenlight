@@ -11,6 +11,7 @@ import (
 	"log/slog"
 	"net"
 	"os"
+	"strings"
 	"sync"
 	"time"
 )
@@ -37,6 +38,10 @@ type config struct {
 		username string
 		password string
 		sender   string
+	}
+
+	cors struct {
+		trustedOrigins []string
 	}
 }
 
@@ -65,7 +70,10 @@ func main() {
 	flag.StringVar(&config.smtp.username, "smtp-username", "45df17c270f1b3", "SMTP username")
 	flag.StringVar(&config.smtp.password, "smtp-password", "2f0711ef4e9f21", "SMTP password")
 	flag.StringVar(&config.smtp.sender, "smtp-sender", "Greenlight <no-reply@greenlight.mateuscardoso.net>", "SMTP sender")
-
+	flag.Func("cors-trusted-origins", "Trusted CORS origins (space separeted)", func(val string) error {
+		config.cors.trustedOrigins = strings.Fields(val)
+		return nil
+	})
 	flag.Parse()
 
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
