@@ -28,4 +28,5 @@ tls/
 docker_volume/
 
 .env
+.envrc
 !sample.env

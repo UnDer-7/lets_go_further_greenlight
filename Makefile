@@ -11,7 +11,7 @@ confirm:
 ## run/api: run the cmd/api application
 .PHONY: run/api
 run/api:
-	go run ./cmd/api
+	@go run ./cmd/api -db-dsn=${GREENLIGHT_DB_DSN}
 
 ## db/migration/new name=$1: create a new database migration
 .PHONY: db/migration/new
