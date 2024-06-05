@@ -8,6 +8,7 @@ import (
 	_ "github.com/lib/pq"
 	"greenlight.mateus.cardoso.com/internal/data"
 	"greenlight.mateus.cardoso.com/internal/mailer"
+	"greenlight.mateus.cardoso.com/internal/vcs"
 	"log"
 	"log/slog"
 	"net"
@@ -17,8 +18,6 @@ import (
 	"sync"
 	"time"
 )
-
-const version = "1.0.0"
 
 type config struct {
 	port int
@@ -55,6 +54,10 @@ type application struct {
 	wg     sync.WaitGroup
 }
 
+var (
+	version = vcs.Version()
+)
+
 func main() {
 	var config config
 
@@ -76,7 +79,14 @@ func main() {
 		config.cors.trustedOrigins = strings.Fields(val)
 		return nil
 	})
+	displayVersion := flag.Bool("version", false, "Display version and exit")
+
 	flag.Parse()
+
+	if *displayVersion {
+		log.Printf("Version:\t%s\n", version)
+		os.Exit(0)
+	}
 
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
