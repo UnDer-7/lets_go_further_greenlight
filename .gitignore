@@ -31,3 +31,6 @@ docker_volume/
 .env
 .envrc
 !sample.env
+
+/bin
+/bin/
